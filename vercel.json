@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "builds": [{ "src": "api/*.js", "use": "@vercel/node" }],
+  "routes": [
+    { "src": "/api/gifts", "dest": "/api/listAllGifts.js" },
+    { "src": "/api/payments", "dest": "/api/listAllpayments.js" },
+    { "src": "/api/create/payment", "dest": "/api/createPayments.js" },
+    { "src": "/api/verify/payment", "dest": "/api/verifyPayments.js" },
+    { "src": "/api/create/message", "dest": "/api/createMessage.js" }
+  ]
+}
