@@ -1,10 +1,14 @@
 import { ImapFlow } from "imapflow";
-import dotenv from "dotenv";
-import db from "./data-source.js";
 
-dotenv.config();
+export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-const getPaymentsEmail = async () => {
+  if (req.method !== "GET") {
+    return res.status(405).json({ message: "Método não permitido" });
+  }
+
   const client = new ImapFlow({
     host: "imap.gmail.com",
     port: 993,
@@ -104,81 +108,5 @@ const getPaymentsEmail = async () => {
     });
   }
 
-  const { data, error } =
-    newPayments.length > 0
-      ? await db
-          .from("payments_pix")
-          .upsert(newPayments)
-          .select("*")
-          .eq("status", "P")
-      : await db.from("payments_pix").select("*").eq("status", "P");
-
-  if (error) {
-    console.log(error);
-    return "Erro";
-  }
-
-  return data;
-};
-
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    return res.status(200).end(); // 🔑 Responde o preflight e libera o CORS
-  }
-
-  if (req.method !== "GET") {
-    return res.status(405).json({ message: "Método não permitido" });
-  }
-
-  const paymentsPix = await getPaymentsEmail();
-  if (paymentsPix === "Erro") {
-    return res
-      .status(500)
-      .json({ error: "Erro ao registrar/obter pagamentos_pix" });
-  }
-
-  const { data: dataPayments, error: errorPayment } = await db
-    .from("payments")
-    .select("*")
-    .eq("status_payment", "P");
-
-  if (errorPayment) {
-    return res.status(500).json({ error: errorPayment.message });
-  }
-
-  const matched = dataPayments
-    .map((payment) => {
-      const paymentSum = Number(
-        (payment.value + payment.ind_payment).toFixed(2)
-      );
-      const pix = paymentsPix.find(
-        (p) => Number(p.value.toFixed(2)) === paymentSum
-      );
-      if (pix) {
-        return { paymentId: payment.id, pixId: pix.id };
-      }
-      return null;
-    })
-    .filter(Boolean);
-
-  if (matched.length > 0) {
-    const idsPayments = matched.map((m) => m.paymentId);
-    await db
-      .from("payments")
-      .update({ status_payment: "F" })
-      .in("id", idsPayments);
-
-    for (const m of matched) {
-      await db
-        .from("payments_pix")
-        .update({ status: "F", id_payment: m.paymentId })
-        .eq("id", m.pixId);
-    }
-  }
-
-  return res.status(200).json(matched);
+  return res.status(200).json({ newPayments });
 }
