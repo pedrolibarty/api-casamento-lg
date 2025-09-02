@@ -20,6 +20,8 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.55.0",
     "dotenv": "^17.2.1",
-    "imapflow": "^1.0.194"
+    "html-to-text": "^9.0.5",
+    "imapflow": "^1.0.194",
+    "mailparser": "^3.7.4"
   }
 }
