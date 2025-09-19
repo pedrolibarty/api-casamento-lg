@@ -6,6 +6,7 @@
     { "src": "/api/payments", "dest": "/api/listAllpayments.js" },
     { "src": "/api/create/payment", "dest": "/api/createPayments.js" },
     { "src": "/api/verify/payment", "dest": "/api/verifyPayments.js" },
-    { "src": "/api/create/message", "dest": "/api/createMessage.js" }
+    { "src": "/api/create/message", "dest": "/api/createMessage.js" },
+    { "src": "/api/pay/gifts", "dest": "/api/listPayGifts.js" }
   ]
 }
